@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { readDB, updateDB } from "@/lib/db";
 import { generateResetToken } from "@/lib/auth";
+import { sendResetPasswordEmail } from "@/lib/email";
 
 export async function POST(req: NextRequest) {
   const { email } = await req.json();
@@ -25,11 +26,15 @@ export async function POST(req: NextRequest) {
     }
   });
 
-  const resetLink = `/account/reset-password?token=${token}&email=${encodeURIComponent(user.email)}`;
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const resetUrl = `${baseUrl}/account/reset-password?token=${token}&email=${encodeURIComponent(user.email)}`;
 
-  return NextResponse.json({
-    ok: true,
-    devNote: "No email service is configured yet, so here's the reset link directly.",
-    resetLink,
-  });
+  try {
+    await sendResetPasswordEmail(user.email, resetUrl);
+  } catch (err) {
+    console.error("Failed to send reset email:", err);
+    return NextResponse.json({ error: "Couldn't send the reset email. Try again shortly." }, { status: 500 });
+  }
+
+  return NextResponse.json({ ok: true, message: "Check your email for a reset link." });
 }

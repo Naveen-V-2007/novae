@@ -83,7 +83,7 @@ function AuthGate({
   const [forgotOpen, setForgotOpen] = useState(false);
   const [forgotEmail, setForgotEmail] = useState("");
   const [forgotError, setForgotError] = useState<string | null>(null);
-  const [forgotLink, setForgotLink] = useState<string | null>(null);
+  const [forgotSuccess, setForgotSuccess] = useState<string | null>(null);
   const [forgotSubmitting, setForgotSubmitting] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -115,7 +115,7 @@ function AuthGate({
   async function handleForgot(e: React.FormEvent) {
     e.preventDefault();
     setForgotError(null);
-    setForgotLink(null);
+    setForgotSuccess(null);
     setForgotSubmitting(true);
     try {
       const res = await fetch("/api/auth/forgot-password", {
@@ -125,11 +125,7 @@ function AuthGate({
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
-      if (data.resetLink) {
-        setForgotLink(data.resetLink);
-      } else {
-        setForgotError("Check your email for a reset link.");
-      }
+      setForgotSuccess(data.message || "Check your email for a reset link.");
     } catch (err: any) {
       setForgotError(err.message);
     } finally {
@@ -156,14 +152,9 @@ function AuthGate({
             />
           </div>
 
-          {forgotLink && (
-            <div className="mt-4 border border-ink/10 bg-soft-grey/40 p-4 text-[13px]">
-              <p className="text-ink/60">
-                No email service is configured yet — use this link directly:
-              </p>
-              <Link href={forgotLink} className="link-underline mt-2 block break-all text-ink">
-                {forgotLink}
-              </Link>
+          {forgotSuccess && (
+            <div className="mt-4 border border-ink/10 bg-soft-grey/40 p-4 text-[13px] text-ink/70">
+              {forgotSuccess}
             </div>
           )}
           {forgotError && <p className="mt-3 text-[13px] text-clay">{forgotError}</p>}
@@ -175,7 +166,7 @@ function AuthGate({
             type="button"
             onClick={() => {
               setForgotOpen(false);
-              setForgotLink(null);
+              setForgotSuccess(null);
               setForgotError(null);
             }}
             className="link-underline mt-4 block text-[13px]"
