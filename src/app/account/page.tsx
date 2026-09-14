@@ -5,6 +5,13 @@ import Link from "next/link";
 
 type Tab = "profile" | "orders" | "addresses" | "wishlist";
 
+const TAB_LABELS: Record<Tab, string> = {
+  profile: "Profile",
+  orders: "Orders",
+  addresses: "Addresses",
+  wishlist: "Wishlist",
+};
+
 export default function AccountPage() {
   const [me, setMe] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -26,35 +33,51 @@ export default function AccountPage() {
     return <AuthGate mode={mode} setMode={setMode} onAuth={(u) => setMe(u)} />;
   }
 
+  const initial = (me.firstName?.[0] ?? "?").toUpperCase();
+
   return (
-    <div className="container-novae grid grid-cols-1 gap-10 py-16 md:grid-cols-4">
+    <div className="container-novae grid grid-cols-1 gap-16 py-16 md:grid-cols-[220px_1fr]">
       <aside>
-        <h1 className="font-heading text-2xl">HI, {me.firstName?.toUpperCase()}</h1>
-        <nav className="mt-8 flex flex-col gap-1 text-[14px]">
-          {(["profile", "orders", "addresses", "wishlist"] as Tab[]).map((t) => (
+        <div className="flex items-center gap-4">
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center bg-ink font-heading text-xl text-bone">
+            {initial}
+          </div>
+          <div className="min-w-0">
+            <p className="truncate font-heading text-lg leading-tight">
+              {me.firstName} {me.lastName}
+            </p>
+            <p className="truncate text-[13px] text-ink/50">{me.email}</p>
+          </div>
+        </div>
+
+        <nav className="mt-10 flex flex-col">
+          {(Object.keys(TAB_LABELS) as Tab[]).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`py-2 text-left capitalize transition-colors ${
-                tab === t ? "text-ink" : "text-ink/45 hover:text-ink"
+              className={`border-l-2 py-2.5 pl-4 text-left text-[14px] transition-colors ${
+                tab === t
+                  ? "border-ink text-ink"
+                  : "border-transparent text-ink/45 hover:text-ink"
               }`}
             >
-              {t}
+              {TAB_LABELS[t]}
             </button>
           ))}
-          <button
-            onClick={async () => {
-              await fetch("/api/auth/logout", { method: "POST" });
-              setMe(null);
-            }}
-            className="mt-4 py-2 text-left text-clay"
-          >
-            Sign Out
-          </button>
         </nav>
+
+        <button
+          onClick={async () => {
+            await fetch("/api/auth/logout", { method: "POST" });
+            setMe(null);
+          }}
+          className="mt-10 border-t border-ink/10 pt-6 text-left text-[13px] text-clay"
+        >
+          Sign out
+        </button>
       </aside>
 
-      <div className="md:col-span-3">
+      <div className="min-w-0">
         {tab === "profile" && <ProfilePanel me={me} />}
         {tab === "orders" && <OrdersPanel />}
         {tab === "addresses" && <AddressesPanel />}
@@ -137,11 +160,11 @@ function AuthGate({
     return (
       <div className="container-novae flex min-h-[60vh] items-center justify-center py-16">
         <form onSubmit={handleForgot} className="w-full max-w-sm">
-          <h1 className="font-heading text-3xl">RESET PASSWORD</h1>
-          <p className="mt-2 text-[14px] text-ink/60">
-            Enter your account email and we'll send a reset link.
+          <h1 className="font-heading text-3xl leading-tight">Reset your password</h1>
+          <p className="mt-3 text-[14px] text-ink/60">
+            Enter the email on your account and we'll send a link to set a new password.
           </p>
-          <div className="mt-6">
+          <div className="mt-8">
             <label className="label-field">Email</label>
             <input
               type="email"
@@ -153,14 +176,12 @@ function AuthGate({
           </div>
 
           {forgotSuccess && (
-            <div className="mt-4 border border-ink/10 bg-soft-grey/40 p-4 text-[13px] text-ink/70">
-              {forgotSuccess}
-            </div>
+            <p className="mt-4 text-[13px] text-ink/70">{forgotSuccess}</p>
           )}
-          {forgotError && <p className="mt-3 text-[13px] text-clay">{forgotError}</p>}
+          {forgotError && <p className="mt-4 text-[13px] text-clay">{forgotError}</p>}
 
-          <button type="submit" disabled={forgotSubmitting} className="btn-primary mt-6">
-            {forgotSubmitting ? "Sending…" : "Send Reset Link"}
+          <button type="submit" disabled={forgotSubmitting} className="btn-primary mt-8">
+            {forgotSubmitting ? "Sending…" : "Send reset link"}
           </button>
           <button
             type="button"
@@ -169,7 +190,7 @@ function AuthGate({
               setForgotSuccess(null);
               setForgotError(null);
             }}
-            className="link-underline mt-4 block text-[13px]"
+            className="link-underline mt-6 block text-[13px]"
           >
             Back to sign in
           </button>
@@ -181,15 +202,20 @@ function AuthGate({
   return (
     <div className="container-novae flex min-h-[60vh] items-center justify-center py-16">
       <form onSubmit={handleSubmit} className="w-full max-w-sm">
-        <h1 className="font-heading text-3xl">
-          {mode === "signin" ? "SIGN IN" : "CREATE ACCOUNT"}
+        <h1 className="font-heading text-3xl leading-tight">
+          {mode === "signin" ? "Sign in" : "Create your account"}
         </h1>
+        <p className="mt-3 text-[14px] text-ink/60">
+          {mode === "signin"
+            ? "Welcome back — sign in to view your orders and saved details."
+            : "Save your addresses and track orders in one place."}
+        </p>
 
         <div className="mt-8 flex flex-col gap-4">
           {mode === "register" && (
             <div className="flex gap-4">
               <div className="flex-1">
-                <label className="label-field">First Name</label>
+                <label className="label-field">First name</label>
                 <input
                   required
                   className="input-field"
@@ -198,7 +224,7 @@ function AuthGate({
                 />
               </div>
               <div className="flex-1">
-                <label className="label-field">Last Name</label>
+                <label className="label-field">Last name</label>
                 <input
                   required
                   className="input-field"
@@ -243,11 +269,11 @@ function AuthGate({
           {error && <p className="text-[13px] text-clay">{error}</p>}
 
           <button type="submit" disabled={submitting} className="btn-primary mt-2">
-            {submitting ? "Please wait…" : mode === "signin" ? "Sign In" : "Create Account"}
+            {submitting ? "Please wait…" : mode === "signin" ? "Sign in" : "Create account"}
           </button>
         </div>
 
-        <p className="mt-6 text-center text-[13px] text-ink/60">
+        <p className="mt-8 text-center text-[13px] text-ink/60">
           {mode === "signin" ? "New to NOVAÉ?" : "Already have an account?"}{" "}
           <button
             type="button"
@@ -263,17 +289,34 @@ function AuthGate({
 }
 
 function ProfilePanel({ me }: { me: any }) {
+  const rows = [
+    { label: "Name", value: `${me.firstName} ${me.lastName}` },
+    { label: "Email", value: me.email },
+    { label: "Phone", value: me.phone || "Not added" },
+  ];
+
   return (
     <div>
-      <h2 className="font-heading text-xl">Profile</h2>
-      <div className="mt-6 max-w-sm space-y-3 text-[14px]">
-        <p><span className="text-ink/50">Name</span><br />{me.firstName} {me.lastName}</p>
-        <p><span className="text-ink/50">Email</span><br />{me.email}</p>
-        <p><span className="text-ink/50">Phone</span><br />{me.phone || "—"}</p>
+      <h2 className="font-heading text-2xl">Profile</h2>
+      <div className="mt-6 max-w-md border-t border-ink/10">
+        {rows.map((r) => (
+          <div key={r.label} className="flex items-baseline justify-between border-b border-ink/10 py-4">
+            <span className="text-[13px] text-ink/50">{r.label}</span>
+            <span className="text-[15px]">{r.value}</span>
+          </div>
+        ))}
       </div>
     </div>
   );
 }
+
+const STATUS_STYLES: Record<string, string> = {
+  placed: "bg-ink/40",
+  processing: "bg-ink/40",
+  shipped: "bg-olive",
+  delivered: "bg-olive",
+  cancelled: "bg-clay",
+};
 
 function OrdersPanel() {
   const [orders, setOrders] = useState<any[]>([]);
@@ -286,26 +329,44 @@ function OrdersPanel() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <p className="text-ink/40">Loading orders…</p>;
-  if (orders.length === 0) return <p className="text-ink/50">No orders yet.</p>;
-
   return (
     <div>
-      <h2 className="font-heading text-xl">Orders</h2>
-      <div className="mt-6 divide-y divide-ink/10">
-        {orders.map((o) => (
-          <div key={o.id} className="flex items-center justify-between py-4 text-[14px]">
-            <div>
-              <p className="font-medium">#{o.id}</p>
-              <p className="text-ink/50">{new Date(o.createdAt).toLocaleDateString()}</p>
+      <h2 className="font-heading text-2xl">Orders</h2>
+
+      {loading ? (
+        <p className="mt-6 text-ink/40">Loading orders…</p>
+      ) : orders.length === 0 ? (
+        <div className="mt-6 max-w-md border-t border-ink/10 py-8">
+          <p className="text-ink/60">You haven't placed an order yet.</p>
+          <Link href="/shop" className="link-underline mt-3 inline-block text-[13px] text-ink">
+            Start shopping
+          </Link>
+        </div>
+      ) : (
+        <div className="mt-6 max-w-xl border-t border-ink/10">
+          {orders.map((o) => (
+            <div key={o.id} className="flex items-center justify-between border-b border-ink/10 py-5">
+              <div>
+                <p className="text-[15px]">Order #{o.id}</p>
+                <p className="mt-1 text-[13px] text-ink/50">
+                  {new Date(o.createdAt).toLocaleDateString("en-IN", {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                  })}
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="flex items-center justify-end gap-2 text-[14px] capitalize">
+                  <span className={`h-1.5 w-1.5 rounded-full ${STATUS_STYLES[o.status] ?? "bg-ink/40"}`} />
+                  {o.status}
+                </p>
+                <p className="mt-1 text-[13px] text-ink/50">₹{o.total}</p>
+              </div>
             </div>
-            <div className="text-right">
-              <p className="capitalize">{o.status}</p>
-              <p className="text-ink/50">₹{o.total}</p>
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -369,9 +430,7 @@ function AddressesPanel() {
   async function handleDelete(id: string) {
     try {
       await fetch(`/api/addresses/${id}`, { method: "DELETE" });
-      load();
-    } catch {
-      // best-effort; refresh either way
+    } finally {
       load();
     }
   }
@@ -379,19 +438,19 @@ function AddressesPanel() {
   return (
     <div>
       <div className="flex items-center justify-between">
-        <h2 className="font-heading text-xl">Addresses</h2>
+        <h2 className="font-heading text-2xl">Addresses</h2>
         {!showForm && (
-          <button onClick={() => setShowForm(true)} className="btn-secondary">
-            + Add Address
+          <button onClick={() => setShowForm(true)} className="text-[13px] text-ink underline underline-offset-4">
+            Add address
           </button>
         )}
       </div>
 
       {showForm && (
-        <form onSubmit={handleSubmit} className="mt-6 max-w-lg border border-ink/10 p-6">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <form onSubmit={handleSubmit} className="mt-8 max-w-lg border-t border-ink/10 pt-8">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
             <div>
-              <label className="label-field">First Name</label>
+              <label className="label-field">First name</label>
               <input
                 required
                 className="input-field"
@@ -400,7 +459,7 @@ function AddressesPanel() {
               />
             </div>
             <div>
-              <label className="label-field">Last Name</label>
+              <label className="label-field">Last name</label>
               <input
                 required
                 className="input-field"
@@ -427,7 +486,7 @@ function AddressesPanel() {
               />
             </div>
             <div className="sm:col-span-2">
-              <label className="label-field">Apartment / Floor (optional)</label>
+              <label className="label-field">Apartment, floor (optional)</label>
               <input
                 className="input-field"
                 value={form.apartment}
@@ -464,7 +523,7 @@ function AddressesPanel() {
             <div>
               <label className="label-field">Label</label>
               <input
-                placeholder="Home, Work, etc."
+                placeholder="Home, Work…"
                 className="input-field"
                 value={form.label}
                 onChange={(e) => update("label", e.target.value)}
@@ -472,11 +531,11 @@ function AddressesPanel() {
             </div>
           </div>
 
-          {error && <p className="mt-4 text-[13px] text-clay">{error}</p>}
+          {error && <p className="mt-5 text-[13px] text-clay">{error}</p>}
 
-          <div className="mt-6 flex gap-3">
+          <div className="mt-8 flex gap-6">
             <button type="submit" disabled={saving} className="btn-primary">
-              {saving ? "Saving…" : "Save Address"}
+              {saving ? "Saving…" : "Save address"}
             </button>
             <button
               type="button"
@@ -485,7 +544,7 @@ function AddressesPanel() {
                 setForm(emptyAddressForm);
                 setError(null);
               }}
-              className="btn-secondary"
+              className="text-[13px] text-ink/50 hover:text-ink"
             >
               Cancel
             </button>
@@ -493,28 +552,30 @@ function AddressesPanel() {
         </form>
       )}
 
-      <div className="mt-6">
+      <div className="mt-8">
         {loading ? (
           <p className="text-ink/40">Loading addresses…</p>
         ) : addresses.length === 0 && !showForm ? (
-          <p className="text-ink/50">No saved addresses yet.</p>
+          <div className="max-w-md border-t border-ink/10 py-8">
+            <p className="text-ink/60">You haven't saved an address yet.</p>
+          </div>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-8 sm:grid-cols-2">
             {addresses.map((a) => (
-              <div key={a.id} className="relative border border-ink/10 p-4 text-[14px]">
+              <div key={a.id} className="group relative border-t border-ink/10 pt-5">
                 <button
                   onClick={() => handleDelete(a.id)}
-                  className="absolute right-3 top-3 text-[12px] text-ink/40 hover:text-clay"
+                  className="absolute right-0 top-5 text-[12px] text-ink/30 opacity-0 transition-opacity hover:text-clay group-hover:opacity-100"
                   aria-label="Remove address"
                 >
                   Remove
                 </button>
-                <p className="text-[11px] uppercase tracking-wider text-ink/40">{a.label}</p>
-                <p className="font-medium">{a.firstName} {a.lastName}</p>
-                <p className="text-ink/60">{a.address}</p>
-                {a.apartment && <p className="text-ink/60">{a.apartment}</p>}
-                <p className="text-ink/60">{a.city}, {a.state} {a.pin}</p>
-                <p className="mt-2 text-ink/50">{a.phone}</p>
+                <p className="text-[12px] text-ink/45">{a.label}</p>
+                <p className="mt-2 text-[15px]">{a.firstName} {a.lastName}</p>
+                <p className="mt-1 text-[14px] text-ink/60">{a.address}</p>
+                {a.apartment && <p className="text-[14px] text-ink/60">{a.apartment}</p>}
+                <p className="text-[14px] text-ink/60">{a.city}, {a.state} {a.pin}</p>
+                <p className="mt-2 text-[13px] text-ink/45">{a.phone}</p>
               </div>
             ))}
           </div>
@@ -527,14 +588,13 @@ function AddressesPanel() {
 function WishlistPanel() {
   return (
     <div>
-      <h2 className="font-heading text-xl">Wishlist</h2>
-      <p className="mt-4 text-ink/50">
-        Your saved items live at{" "}
-        <Link href="/wishlist" className="link-underline">
-          /wishlist
+      <h2 className="font-heading text-2xl">Wishlist</h2>
+      <div className="mt-6 max-w-md border-t border-ink/10 py-8">
+        <p className="text-ink/60">Everything you've saved lives on one page.</p>
+        <Link href="/wishlist" className="link-underline mt-3 inline-block text-[13px] text-ink">
+          View wishlist
         </Link>
-        .
-      </p>
+      </div>
     </div>
   );
 }
