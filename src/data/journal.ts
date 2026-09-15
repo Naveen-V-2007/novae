@@ -1,5 +1,4 @@
 import { JournalArticle } from "@/lib/types";
-import { placeholder } from "@/lib/placeholder";
 
 export const journalArticles: JournalArticle[] = [
   {
@@ -9,7 +8,7 @@ export const journalArticles: JournalArticle[] = [
     category: "Philosophy",
     excerpt:
       "Restraint is not the absence of style. It is style, refined until only what matters is left.",
-    image: placeholder("The Art of Wearing Less", "ink", 1200, 900),
+    image: "/images/journal/the-art-of-wearing-less.jpeg",
     date: "2026-02-14",
     body: [
       "A wardrobe built around fewer, better pieces is not a compromise. It is a discipline — one that asks what a garment actually needs to do before deciding what it should look like.",
@@ -24,7 +23,7 @@ export const journalArticles: JournalArticle[] = [
     category: "Material",
     excerpt:
       "The fabric decides everything else — how a piece moves, ages and feels against the skin.",
-    image: placeholder("Why Fabric Matters", "olive", 1200, 900),
+    image: "/images/journal/why-fabric-matters.jpeg",
     date: "2026-01-22",
     body: [
       "Before a single seam is cut, the fabric has already decided most of the outcome. A linen that is too light will crease unpredictably. A cotton that is too dense will resist movement. The right cloth makes the pattern's job easier.",
@@ -39,7 +38,7 @@ export const journalArticles: JournalArticle[] = [
     category: "Guide",
     excerpt:
       "A working capsule wardrobe is built on repetition, not variety — the same good decisions, worn often.",
-    image: placeholder("Building a Better Capsule Wardrobe", "clay", 1200, 900),
+    image: "/images/journal/building-a-better-capsule-wardrobe.jpeg",
     date: "2025-12-30",
     body: [
       "A capsule wardrobe fails when it tries to cover every occasion. It works when it covers most of them, well.",
@@ -54,7 +53,7 @@ export const journalArticles: JournalArticle[] = [
     category: "Perspective",
     excerpt:
       "A generation of Indian dressing that borrows from architecture and urban life, not just tradition.",
-    image: placeholder("The New Indian Minimalism", "bone", 1200, 900),
+    image: "/images/journal/the-new-indian-minimalism.jpeg",
     date: "2025-11-18",
     body: [
       "Contemporary Indian style is no longer defined only by its ethnicwear or its streetwear — a third language has emerged, one shaped by the country's architecture, its concrete and stone, and the rhythm of its cities.",

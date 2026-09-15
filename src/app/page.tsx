@@ -20,7 +20,7 @@ export default async function HomePage() {
       {/* Hero */}
       <section className="relative flex h-[92vh] min-h-[560px] w-full items-center justify-center overflow-hidden bg-ink">
         <Image
-          src="/images/hero/hero-main.jpg"
+          src="/images/hero/hero-main.png"
           alt="NOVAÉ — Everyday, Elevated"
           fill
           priority
